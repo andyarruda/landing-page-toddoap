@@ -1,0 +1,12 @@
+# Configurações de IDE
+.idea/
+*.iml
+.vscode/
+
+# Arquivos do macOS e Windows
+.DS_Store
+Thumbs.db
+
+# Dependências e arquivos gerados
+node_modules/
+dist/
