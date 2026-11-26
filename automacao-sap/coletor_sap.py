@@ -13,8 +13,10 @@ Comandos:
         -> converte uma gravação do SAP GUI (.vbs) em roteiro no roteiros_sap.json
   python coletor_sap.py listar
         -> mostra as conexões/sessões SAP abertas (para conferir o "sistema")
-  python coletor_sap.py coletar [--somente mm,ewm] [--sem-analise]
-        -> executa os roteiros e roda a análise
+  python coletor_sap.py coletar [--fluxo estoque|perfis] [--somente mm,ewm] [--sem-analise]
+        -> executa os roteiros do fluxo e roda a análise correspondente
+           estoque: filas, mm, ewm       -> analise_mm_ewm.py
+           perfis : perfis, usuarios     -> analise_perfis.py (+ catálogo GPA exportado em entrada\\)
 
 Requisitos: Windows, SAP GUI com scripting habilitado, Python 3.9+, pywin32
   pip install pywin32 pandas openpyxl
@@ -248,9 +250,18 @@ def voltar_menu(sessao):
 def cmd_coletar(a):
     roteiros = carregar_roteiros()
     cfg = roteiros["conexao"]
-    selecionados = [r for r in roteiros["ordem"] if r in roteiros["roteiros"]]
+    fluxo = a.fluxo
+    if fluxo not in roteiros["fluxos"]:
+        sys.exit(f"Fluxo '{fluxo}' não existe. Disponíveis: {list(roteiros['fluxos'])}")
+    selecionados = [r for r in roteiros["fluxos"][fluxo] if r in roteiros["roteiros"]]
     if a.somente:
         selecionados = [r for r in a.somente.split(",") if r in roteiros["roteiros"]]
+    if fluxo == "perfis" and not a.sem_analise and not arquivo_entrada("catalogo_gpa"):
+        sys.exit("Falta o catálogo do GPA. Exporte-o do GPA e salve em entrada\\catalogo_gpa.xlsx "
+                 "(ou .csv). Opcional: entrada\\solicitacoes_gpa.xlsx")
+    for r in [r for r in selecionados if roteiros["roteiros"][r].get("modelo") and roteiros["roteiros"][r].get("opcional")]:
+        print(f"[AVISO] Roteiro opcional '{r}' ainda é MODELO e será pulado. Grave e importe quando puder.")
+        selecionados.remove(r)
     pendentes = [r for r in selecionados if roteiros["roteiros"][r].get("modelo")]
     if pendentes:
         sys.exit(f"Os roteiros {pendentes} ainda são MODELO. Grave as transações no SAP GUI e importe:\n"
@@ -307,21 +318,42 @@ def cmd_coletar(a):
     print(f"Log: {log_path}")
     if a.sem_analise:
         return
-    if "mm" not in gerados or "ewm" not in gerados:
-        sys.exit("Análise não executada: faltou a extração de 'mm' ou 'ewm'.")
-    cmd = [sys.executable, str(BASE / "analise_mm_ewm.py"), "--mm", str(gerados["mm"]),
-           "--ewm", str(gerados["ewm"])]
-    if "filas" in gerados:
-        cmd += ["--filas", str(gerados["filas"])]
-    if (BASE / "config.json").exists():
-        cmd += ["--config", str(BASE / "config.json")]
+    if fluxo == "perfis":
+        if "perfis" not in gerados:
+            sys.exit("Análise não executada: faltou a extração de 'perfis'.")
+        cmd = [sys.executable, str(BASE / "analise_perfis.py"), "--perfis", str(gerados["perfis"]),
+               "--catalogo", str(arquivo_entrada("catalogo_gpa"))]
+        if "usuarios" in gerados:
+            cmd += ["--usuarios", str(gerados["usuarios"])]
+        if arquivo_entrada("solicitacoes_gpa"):
+            cmd += ["--solicitacoes", str(arquivo_entrada("solicitacoes_gpa"))]
+        if (BASE / "config_perfis.json").exists():
+            cmd += ["--config", str(BASE / "config_perfis.json")]
+        relatorio = BASE / "saida" / hoje.isoformat() / "perfis" / "relatorio_perfis.html"
+    else:
+        if "mm" not in gerados or "ewm" not in gerados:
+            sys.exit("Análise não executada: faltou a extração de 'mm' ou 'ewm'.")
+        cmd = [sys.executable, str(BASE / "analise_mm_ewm.py"), "--mm", str(gerados["mm"]),
+               "--ewm", str(gerados["ewm"])]
+        if "filas" in gerados:
+            cmd += ["--filas", str(gerados["filas"])]
+        if (BASE / "config.json").exists():
+            cmd += ["--config", str(BASE / "config.json")]
+        relatorio = BASE / "saida" / hoje.isoformat() / "relatorio.html"
     subprocess.run(cmd, check=True)
-    relatorio = BASE / "saida" / hoje.isoformat() / "relatorio.html"
     if relatorio.exists() and not a.nao_abrir:
         import os
         os.startfile(relatorio)  # noqa  (Windows)
     if falhas:
         print(f"[ATENÇÃO] Roteiros com falha: {falhas}")
+
+
+def arquivo_entrada(nome):
+    """Arquivo exportado manualmente (ex.: do GPA) em entrada\\, em qualquer formato aceito."""
+    for ext in (".xlsx", ".xls", ".csv", ".txt"):
+        if (PASTA_ENTRADA / f"{nome}{ext}").exists():
+            return PASTA_ENTRADA / f"{nome}{ext}"
+    return None
 
 
 def cmd_listar(_):
@@ -341,7 +373,7 @@ ROTEIROS_PADRAO = {
         "fechar_sessao_ao_final": True,
     },
     "variaveis": {"CENTRO": "1000"},
-    "ordem": ["filas", "mm", "ewm"],
+    "fluxos": {"estoque": ["filas", "mm", "ewm"], "perfis": ["perfis", "usuarios"]},
     "roteiros": {
         "mm": {
             "modelo": True,
@@ -369,6 +401,35 @@ ROTEIROS_PADRAO = {
             "modelo": True,
             "descricao": "SMQ2 - filas qRFC de entrada (MODELO: grave e importe o seu)",
             "arquivo_saida": "filas.txt",
+            "opcional": True,
+            "passos": [],
+        },
+        "perfis": {
+            "modelo": True,
+            "descricao": "SE16N AGR_USERS - usuário x perfil x validade (MODELO: grave e importe o seu)",
+            "arquivo_saida": "perfis.txt",
+            "passos": [
+                {"id": "wnd[0]/tbar[0]/okcd", "prop": "text", "valor": "/nSE16N"},
+                {"id": "wnd[0]", "metodo": "sendVKey", "args": [0]},
+                {"id": "wnd[0]/usr/ctxtGD-TAB", "prop": "text", "valor": "AGR_USERS"},
+                {"id": "wnd[0]", "metodo": "sendVKey", "args": [0]},
+                {"id": "wnd[0]/usr/txtGD-MAX_LINES", "prop": "text", "valor": ""},
+                {"id": "wnd[0]/tbar[1]/btn[8]", "metodo": "press", "args": []},
+                {"id": "wnd[0]/usr/cntlRESULT_LIST/shellcont/shell", "metodo": "pressToolbarContextButton",
+                 "args": ["&MB_EXPORT"]},
+                {"id": "wnd[0]/usr/cntlRESULT_LIST/shellcont/shell", "metodo": "selectContextMenuItem",
+                 "args": ["&PC"]},
+                {"id": "wnd[1]/tbar[0]/btn[0]", "metodo": "press", "args": []},
+                {"id": "wnd[1]/usr/ctxtDY_PATH", "prop": "text", "valor": "{PASTA_ENTRADA}"},
+                {"id": "wnd[1]/usr/ctxtDY_FILENAME", "prop": "text", "valor": "{ARQUIVO}"},
+                {"id": "wnd[1]/tbar[0]/btn[11]", "metodo": "press", "args": []},
+            ],
+        },
+        "usuarios": {
+            "modelo": True,
+            "descricao": "SE16N USR02 - tipo, bloqueio, último logon (MODELO: grave e importe o seu)",
+            "arquivo_saida": "usuarios.txt",
+            "opcional": True,
             "passos": [],
         },
     },
@@ -378,7 +439,25 @@ ROTEIROS_PADRAO = {
 def carregar_roteiros():
     if not ARQ_ROTEIROS.exists():
         salvar_roteiros(ROTEIROS_PADRAO)
-    return json.loads(ARQ_ROTEIROS.read_text(encoding="utf-8"))
+    r = json.loads(ARQ_ROTEIROS.read_text(encoding="utf-8"))
+    # Arquivos de versões anteriores: acrescenta fluxos/roteiros novos sem mexer nos já gravados
+    alterado = False
+    if "fluxos" not in r:
+        r["fluxos"] = json.loads(json.dumps(ROTEIROS_PADRAO["fluxos"]))
+        if r.get("ordem"):
+            r["fluxos"]["estoque"] = r.pop("ordem")
+        alterado = True
+    for k, v in ROTEIROS_PADRAO["fluxos"].items():
+        if k not in r["fluxos"]:
+            r["fluxos"][k] = list(v)
+            alterado = True
+    for k, v in ROTEIROS_PADRAO["roteiros"].items():
+        if k not in r["roteiros"]:
+            r["roteiros"][k] = json.loads(json.dumps(v))
+            alterado = True
+    if alterado:
+        salvar_roteiros(r)
+    return r
 
 
 def salvar_roteiros(r):
@@ -390,10 +469,11 @@ def main():
     sub = p.add_subparsers(dest="cmd", required=True)
     i = sub.add_parser("importar", help="Converte gravação .vbs do SAP GUI em roteiro")
     i.add_argument("vbs")
-    i.add_argument("--nome", required=True, help="mm, ewm ou filas")
+    i.add_argument("--nome", required=True, help="mm, ewm, filas, perfis ou usuarios")
     i.add_argument("--arquivo", help="Nome do arquivo exportado (padrão: <nome>.txt)")
     i.set_defaults(func=cmd_importar)
     c = sub.add_parser("coletar", help="Executa os roteiros no SAP e roda a análise")
+    c.add_argument("--fluxo", default="estoque", help="estoque (MM x EWM) ou perfis (perfis x GPA)")
     c.add_argument("--somente", help="Ex.: mm,ewm")
     c.add_argument("--sem-analise", action="store_true")
     c.add_argument("--nao-abrir", action="store_true", help="Não abre o relatório no final")

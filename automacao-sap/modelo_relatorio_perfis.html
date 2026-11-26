@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Perfis de acesso SAP x GPA — __DATA__</title>
+<style>
+:root{
+  --brand:#0070f2; --bg:#f5f6f7; --card:#fff; --text:#1d2d3e; --text2:#556b82; --border:#e5e5e5;
+  --neg:#aa0808; --neg-bg:#ffeaf4; --crit:#b44f00; --crit-bg:#fff3b8; --pos:#256f3a; --pos-bg:#f5fae5;
+  --info:#0064d9; --info-bg:#e1f4ff; --hover:#eaecee; --sel:#ebf8ff;
+  --shadow:0 0 .125rem 0 rgba(34,53,72,.2),0 .125rem .25rem 0 rgba(34,53,72,.2);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"72","72full",-apple-system,"Segoe UI",Arial,sans-serif;font-size:14px;color:var(--text);background:var(--bg)}
+button{font:inherit;cursor:pointer}
+/* Shell bar */
+.shell{height:3.25rem;background:#fff;display:flex;align-items:center;gap:.75rem;padding:0 1rem;box-shadow:var(--shadow);position:sticky;top:0;z-index:5}
+.shell .logo{width:2rem;height:2rem;border-radius:.5rem;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700}
+.shell .app{font-weight:700;font-size:.875rem}
+.shell .sub{color:var(--text2);font-size:.875rem}
+.shell .sp{flex:1}
+.shell .tag{font-size:.75rem;color:var(--text2);border:1px solid var(--border);border-radius:1rem;padding:.25rem .75rem}
+/* Header da página */
+.head{background:#fff;padding:1rem 2rem 0;border-bottom:1px solid var(--border)}
+.head h1{margin:0;font-size:1.25rem;font-weight:700}
+.head .meta{color:var(--text2);font-size:.8125rem;margin:.25rem 0 1rem}
+.strip{display:flex;gap:.5rem;align-items:flex-start;background:var(--crit-bg);border:1px solid #f0d27a;border-radius:.5rem;padding:.5rem .75rem;margin:0 0 .5rem;font-size:.8125rem}
+.strip b{color:var(--crit)}
+/* Tabs (IconTabBar) */
+.tabs{display:flex;gap:.25rem;overflow-x:auto;margin-top:.5rem}
+.tab{background:none;border:0;padding:.75rem .875rem;border-bottom:3px solid transparent;color:var(--text);white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:.125rem}
+.tab .c{font-size:1.25rem;font-weight:400}
+.tab .t{font-size:.75rem;color:var(--text2)}
+.tab.neg .c{color:var(--neg)} .tab.crit .c{color:var(--crit)} .tab.pos .c{color:var(--pos)}
+.tab.on{border-bottom-color:var(--brand)} .tab.on .t{color:var(--brand)}
+.tab:hover{background:var(--hover)}
+main{padding:1rem 2rem 2rem;max-width:1500px;margin:auto}
+/* Tiles */
+.tiles{display:flex;flex-wrap:wrap;gap:1rem;margin:1rem 0}
+.tile{width:11rem;height:11rem;background:var(--card);border-radius:1rem;box-shadow:var(--shadow);padding:1rem;display:flex;flex-direction:column;border:0;text-align:left}
+.tile:hover{box-shadow:0 0 0 .0625rem var(--brand),var(--shadow)}
+.tile .h{font-size:.875rem;font-weight:700;line-height:1.2}
+.tile .s{font-size:.75rem;color:var(--text2);margin-top:.25rem}
+.tile .n{margin-top:auto;font-size:2.5rem;font-weight:300;color:var(--text2)}
+.tile.neg .n{color:var(--neg)} .tile.crit .n{color:var(--crit)} .tile.pos .n{color:var(--pos)} .tile.info .n{color:var(--info)}
+/* Card + toolbar */
+.card{background:var(--card);border-radius:.75rem;box-shadow:var(--shadow);margin-bottom:1rem}
+.bar{display:flex;align-items:center;gap:.5rem;padding:.75rem 1rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.bar h2{margin:0;font-size:1rem;font-weight:700;flex:1}
+.seg{display:inline-flex;border:1px solid var(--brand);border-radius:.5rem;overflow:hidden}
+.seg button{border:0;background:#fff;color:var(--brand);padding:.375rem .875rem}
+.seg button.on{background:var(--brand);color:#fff}
+.search{border:1px solid #bcc3ca;border-radius:.5rem;padding:.4375rem .75rem;width:18rem;max-width:100%}
+.search:focus{outline:2px solid var(--brand);outline-offset:-1px}
+.btn{border:1px solid #bcc3ca;background:#fff;color:var(--brand);border-radius:.5rem;padding:.375rem .875rem}
+.btn:hover{background:var(--hover)}
+.wrap{overflow:auto;max-height:65vh}
+table{border-collapse:collapse;width:100%;font-size:.8125rem}
+th{position:sticky;top:0;background:#fff;text-align:left;font-weight:400;color:var(--text2);padding:.625rem .75rem;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{background:var(--hover)}
+th .ar{color:var(--brand)}
+td{padding:.5rem .75rem;border-bottom:1px solid var(--border);vertical-align:top}
+tbody tr{cursor:pointer} tbody tr:hover{background:var(--hover)} tbody tr.sel{background:var(--sel)}
+.link{color:var(--brand)}
+.muted{color:var(--text2)}
+.empty{padding:2rem;text-align:center;color:var(--text2)}
+/* ObjectStatus */
+.st{display:inline-block;border-radius:.25rem;padding:.0625rem .375rem;font-size:.75rem;font-weight:700;white-space:nowrap}
+.st.neg{color:var(--neg);background:var(--neg-bg)} .st.crit{color:var(--crit);background:var(--crit-bg)}
+.st.pos{color:var(--pos);background:var(--pos-bg)} .st.info{color:var(--info);background:var(--info-bg)}
+.st.none{color:var(--text2);background:#eff1f2}
+.pill{display:inline-block;border:1px solid var(--border);border-radius:1rem;padding:0 .5rem;font-size:.6875rem;color:var(--text2);margin:.0625rem .125rem 0 0}
+/* Painel lateral (detalhe do usuário) */
+.side{position:fixed;top:0;right:0;height:100%;width:min(34rem,100%);background:#fff;box-shadow:-.25rem 0 1rem rgba(34,53,72,.25);transform:translateX(105%);transition:transform .2s;z-index:10;display:flex;flex-direction:column}
+.side.on{transform:none}
+.side .sh{padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;gap:.75rem;align-items:center}
+.side .av{width:2.75rem;height:2.75rem;border-radius:50%;background:var(--info-bg);color:var(--info);display:grid;place-items:center;font-weight:700}
+.side .sb{padding:1rem 1.25rem;overflow:auto}
+.side h3{font-size:.875rem;margin:1rem 0 .5rem}
+.side .it{border:1px solid var(--border);border-radius:.5rem;padding:.625rem .75rem;margin-bottom:.5rem}
+.side .it .p{font-weight:700}
+.side ul{margin:.375rem 0 0;padding-left:1.1rem;color:var(--text2);font-size:.8125rem}
+.x{margin-left:auto;border:0;background:none;font-size:1.25rem;color:var(--text2)}
+/* Grade inferior */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.head,main{padding-left:1rem;padding-right:1rem}}
+.pad{padding:1rem}
+label.ck{display:flex;gap:.5rem;padding:.375rem 0;align-items:center}
+.trend{display:flex;gap:.5rem;align-items:flex-end;height:9rem}
+.trend .b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;font-size:.6875rem;color:var(--text2)}
+.trend .col{width:60%;max-width:2.5rem;display:flex;flex-direction:column;justify-content:flex-end;min-height:2px}
+.trend .tot{background:#a6cff7;border-radius:.25rem .25rem 0 0}
+.trend .alt{background:var(--neg)}
+.leg{font-size:.75rem;color:var(--text2);margin-top:.5rem}
+.leg i{display:inline-block;width:.625rem;height:.625rem;border-radius:2px;margin:0 .25rem 0 .75rem;vertical-align:middle}
+.foot{color:var(--text2);font-size:.75rem;margin-top:1rem}
+@media print{.shell,.tabs,.search,.btn,.seg,.side{display:none!important}.wrap{max-height:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="logo">GA</div>
+  <div class="app">Perfis de acesso SAP x GPA</div>
+  <div class="sub" id="shSub"></div>
+  <div class="sp"></div>
+  <div class="tag">Somente leitura</div>
+</div>
+
+<div class="head">
+  <h1>Revisão diária de perfis de acesso</h1>
+  <div class="meta" id="meta"></div>
+  <div id="avisos"></div>
+  <div class="tabs" id="tabs" role="tablist"></div>
+</div>
+
+<main>
+  <div class="tiles" id="tiles"></div>
+
+  <div class="card">
+    <div class="bar">
+      <h2 id="tblTitle"></h2>
+      <div class="seg" id="views">
+        <button data-v="atrib" class="on">Atribuições</button>
+        <button data-v="perfis">Por perfil</button>
+        <button data-v="semuso">Catálogo sem uso</button>
+      </div>
+      <input class="search" id="q" placeholder="Pesquisar usuário, perfil, descrição..." type="search">
+      <button class="btn" id="csv">Exportar CSV</button>
+    </div>
+    <div class="wrap"><table><thead id="th"></thead><tbody id="tb"></tbody></table><div class="empty" id="empty" hidden></div></div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><div class="bar"><h2>Checklist do analista</h2></div><div class="pad" id="chk"></div></div>
+    <div class="card"><div class="bar"><h2>Tendência (achados por dia)</h2></div>
+      <div class="pad"><div class="trend" id="trend"></div>
+      <div class="leg"><i style="background:#a6cff7"></i>Achados com risco <i style="background:var(--neg)"></i>Risco alto</div></div></div>
+  </div>
+  <p class="foot">Relatório gerado automaticamente a partir de exportações do SAP e do GPA. Nenhum acesso foi
+  atribuído ou removido. Remoções e regularizações seguem o processo do GPA e a aprovação do dono do perfil / time de Segurança.</p>
+</main>
+
+<aside class="side" id="side" aria-hidden="true">
+  <div class="sh"><div class="av" id="sAv"></div><div><div style="font-weight:700" id="sNome"></div>
+  <div class="muted" id="sSub" style="font-size:.8125rem"></div></div><button class="x" id="sX" aria-label="Fechar">✕</button></div>
+  <div class="sb" id="sBody"></div>
+</aside>
+
+<script>
+const D=/*__DADOS__*/null;
+const A=D.achados;
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const tem=(x,m)=>x.motivos.includes(m);
+const RISCO={"Alto":"neg","Médio":"crit","Baixo":"info","OK":"pos"};
+const GPA={"Solicitável":"pos","Via função composta":"none","Não solicitável":"crit","Inativo no GPA":"crit","Fora do catálogo":"neg"};
+const ORD={"Alto":0,"Médio":1,"Baixo":2,"OK":3};
+const st=(t,c)=>`<span class="st ${c||"none"}">${esc(t)}</span>`;
+
+const FILTROS=[
+  {k:"todos",t:"Todas",f:()=>true},
+  {k:"alto",t:"Risco alto",c:"neg",f:x=>x.risco==="Alto"},
+  {k:"fora",t:"Fora do catálogo GPA",c:"neg",f:x=>tem(x,"fora_catalogo")},
+  {k:"nsol",t:"Não solicitável",c:"crit",f:x=>tem(x,"nao_solicitavel")||tem(x,"inativo_gpa")},
+  {k:"ssol",t:"Sem solicitação",c:"crit",f:x=>tem(x,"sem_solicitacao"),so:"tem_solicitacoes"},
+  {k:"crit",t:"Perfis críticos",c:"crit",f:x=>tem(x,"critico")},
+  {k:"venc",t:"Vencendo / vencidas",c:"crit",f:x=>tem(x,"vencendo")||tem(x,"vencido")},
+  {k:"inat",t:"Usuário inativo/bloqueado",c:"crit",f:x=>tem(x,"usuario_inativo")||tem(x,"usuario_bloqueado"),so:"tem_usuarios"},
+  {k:"ok",t:"Regulares",c:"pos",f:x=>x.risco==="OK"},
+].filter(f=>!f.so||D[f.so]);
+
+let filtro="todos", view="atrib", sortK=null, sortDir=1, sel=null;
+
+/* Cabeçalho */
+document.getElementById("shSub").textContent=D.data.split("-").reverse().join("/");
+const o=D.origem;
+document.getElementById("meta").innerHTML=[["Perfis",o.perfis],["Catálogo GPA",o.catalogo],["Solicitações GPA",o.solicitacoes],["Usuários",o.usuarios]]
+  .map(([k,v])=>`${k}: <b>${esc(v||"não informado")}</b>`).join(" · ");
+document.getElementById("avisos").innerHTML=D.avisos.map(a=>`<div class="strip"><b>⚠</b><span>${esc(a)}</span></div>`).join("");
+
+/* Tabs e tiles */
+function renderTabs(){
+  document.getElementById("tabs").innerHTML=FILTROS.map(f=>`<button class="tab ${f.c||""} ${f.k===filtro&&view==="atrib"?"on":""}" data-f="${f.k}" role="tab">
+    <span class="c">${A.filter(f.f).length}</span><span class="t">${esc(f.t)}</span></button>`).join("");
+}
+const usuarios=new Set(A.map(x=>x.usuario));
+const TILES=[
+  {h:"Atribuições analisadas",s:`${usuarios.size} usuário(s)`,n:A.length,c:"info",f:"todos"},
+  {h:"Risco alto",s:"Ação prioritária",n:A.filter(x=>x.risco==="Alto").length,c:"neg",f:"alto"},
+  {h:"Fora do catálogo GPA",s:"Atribuído fora do processo",n:A.filter(x=>tem(x,"fora_catalogo")).length,c:"neg",f:"fora"},
+  {h:"Não solicitável via GPA",s:"Ou inativo no catálogo",n:A.filter(x=>tem(x,"nao_solicitavel")||tem(x,"inativo_gpa")).length,c:"crit",f:"nsol"},
+  ...(D.tem_solicitacoes?[{h:"Sem solicitação aprovada",s:"Sem evidência no GPA",n:A.filter(x=>tem(x,"sem_solicitacao")).length,c:"crit",f:"ssol"}]:[]),
+  {h:"Vencendo",s:`Em até ${D.dias_venc} dias`,n:A.filter(x=>tem(x,"vencendo")).length,c:"crit",f:"venc"},
+  {h:"Solicitáveis e regulares",s:"Sem pendências",n:A.filter(x=>x.risco==="OK").length,c:"pos",f:"ok"},
+];
+document.getElementById("tiles").innerHTML=TILES.map(t=>`<button class="tile ${t.n?t.c:""}" data-f="${t.f}">
+  <span class="h">${esc(t.h)}</span><span class="s">${esc(t.s)}</span><span class="n">${t.n}</span></button>`).join("");
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-f]"); if(!b) return;
+  filtro=b.dataset.f; setView("atrib");
+  if(b.classList.contains("tile")) document.querySelector(".card").scrollIntoView({behavior:"smooth"});
+});
+
+/* Visões */
+const COLS={
+  atrib:[
+    ["risco","Risco",x=>st(x.risco,RISCO[x.risco]),x=>ORD[x.risco]*100-x.pontos],
+    ["usuario","Usuário",x=>`<span class="link">${esc(x.usuario)}</span><div class="muted">${esc(x.nome)}</div>`],
+    ["perfil","Perfil",x=>`<b>${esc(x.perfil)}</b>${x.critico?' '+st("Crítico","neg"):""}<div class="muted">${esc(x.descricao)}</div>`],
+    ["situacao_gpa","Situação no GPA",x=>st(x.situacao_gpa,GPA[x.situacao_gpa])],
+    ...(D.tem_solicitacoes?[["solicitacao","Solicitação GPA",x=>x.solicitacao&&!x.solicitacao.startsWith("Sem")&&x.solicitacao!=="n/a"?esc(x.solicitacao):x.solicitacao==="n/a"?'<span class="muted">n/a</span>':st(x.solicitacao,"crit")]]:[]),
+    ["validade","Validade",x=>(x.validade==="Vigente"?esc(x.validade):st(x.validade,x.validade.startsWith("Vencida")?"none":"crit"))+`<div class="muted">${esc(x.inicio)} → ${esc(x.fim)}</div>`],
+    ...(D.tem_usuarios?[["status_usuario","Usuário SAP",x=>x.status_usuario==="Ativo"?esc(x.status_usuario):st(x.status_usuario,x.status_usuario.startsWith("Técnico")?"none":"crit")]]:[]),
+    ["situacao","Histórico",x=>x.situacao?st(x.situacao,x.situacao==="Novo"?"info":"none"):""],
+  ],
+  perfis:[
+    ["perfil","Perfil",x=>`<b>${esc(x.perfil)}</b>${x.critico?' '+st("Crítico","neg"):""}<div class="muted">${esc(x.descricao)}</div>`],
+    ["situacao_gpa","Situação no GPA",x=>st(x.situacao_gpa,GPA[x.situacao_gpa])],
+    ["usuarios","Usuários",x=>x.usuarios],
+    ["com_risco","Com risco",x=>x.com_risco?st(x.com_risco,x.alto?"neg":"crit"):"0"],
+    ["aprovador","Aprovador",x=>esc(x.aprovador)],
+  ],
+  semuso:[
+    ["perfil","Perfil",x=>`<b>${esc(x.perfil)}</b><div class="muted">${esc(x.descricao)}</div>`],
+    ["solicitavel","Solicitável",x=>x.solicitavel?st("Sim","pos"):st("Não","crit")],
+    ["status","Status",x=>esc(x.status||"—")],
+    ["aprovador","Aprovador",x=>esc(x.aprovador)],
+  ],
+};
+function porPerfil(lista){
+  const m={};
+  lista.forEach(x=>{const p=m[x.perfil]??={perfil:x.perfil,descricao:x.descricao,situacao_gpa:x.situacao_gpa,critico:x.critico,aprovador:x.aprovador,usuarios:0,com_risco:0,alto:0};
+    p.usuarios++; if(x.risco!=="OK")p.com_risco++; if(x.risco==="Alto")p.alto++;});
+  return Object.values(m).sort((a,b)=>b.alto-a.alto||b.com_risco-a.com_risco||b.usuarios-a.usuarios);
+}
+function linhas(){
+  const q=document.getElementById("q").value.toLowerCase().trim();
+  const f=FILTROS.find(f=>f.k===filtro)||FILTROS[0];
+  let base=view==="semuso"?D.sem_uso:A.filter(f.f);
+  if(q) base=base.filter(x=>[x.usuario,x.nome,x.perfil,x.descricao,x.situacao_gpa,x.solicitacao,x.aprovador].join(" ").toLowerCase().includes(q));
+  let rows=view==="perfis"?porPerfil(base):base.slice();
+  if(view==="atrib"&&!sortK) rows.sort((a,b)=>ORD[a.risco]-ORD[b.risco]||b.pontos-a.pontos||a.usuario.localeCompare(b.usuario));
+  if(sortK){const c=COLS[view].find(c=>c[0]===sortK);const key=c[3]||(x=>x[sortK]);
+    rows.sort((a,b)=>{const va=key(a),vb=key(b);return (typeof va==="number"&&typeof vb==="number"?va-vb:String(va).localeCompare(String(vb)))*sortDir;});}
+  return rows;
+}
+function render(){
+  renderTabs();
+  const cols=COLS[view], rows=linhas();
+  const f=FILTROS.find(f=>f.k===filtro);
+  const nomes={atrib:"Atribuições",perfis:"Perfis",semuso:"Perfis do catálogo GPA sem nenhum usuário"};
+  document.getElementById("tblTitle").textContent=`${nomes[view]}${view!=="semuso"&&filtro!=="todos"?" · "+f.t:""} (${rows.length})`;
+  document.getElementById("th").innerHTML="<tr>"+cols.map(c=>`<th data-s="${c[0]}">${esc(c[1])} <span class="ar">${sortK===c[0]?(sortDir>0?"▲":"▼"):""}</span></th>`).join("")+"</tr>";
+  document.getElementById("tb").innerHTML=rows.map((x,i)=>`<tr data-i="${i}" class="${view==="atrib"&&sel===x.usuario?"sel":""}">`+cols.map(c=>`<td>${c[2](x)}</td>`).join("")+"</tr>").join("");
+  const em=document.getElementById("empty"); em.hidden=rows.length>0; em.textContent="Nenhum registro para este filtro. ✔";
+  window._rows=rows;
+}
+function setView(v){view=v;sortK=null;document.querySelectorAll("#views button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));render();}
+document.getElementById("views").onclick=e=>{const b=e.target.closest("button");if(b)setView(b.dataset.v);};
+document.getElementById("q").oninput=render;
+document.getElementById("th").onclick=e=>{const t=e.target.closest("th");if(!t)return;const k=t.dataset.s;sortDir=sortK===k?-sortDir:1;sortK=k;render();};
+document.getElementById("tb").onclick=e=>{
+  const tr=e.target.closest("tr"); if(!tr) return; const x=window._rows[+tr.dataset.i];
+  if(view==="atrib") abrirUsuario(x.usuario);
+  else {document.getElementById("q").value=x.perfil; filtro="todos"; setView("atrib");}
+};
+
+/* Painel do usuário */
+const MOT={fora_catalogo:"Fora do catálogo GPA",nao_solicitavel:"Não solicitável",inativo_gpa:"Inativo no GPA",sem_solicitacao:"Sem solicitação aprovada",
+  critico:"Perfil crítico",usuario_inativo:"Usuário inativo",usuario_bloqueado:"Usuário bloqueado/expirado",vencendo:"Vencendo",vencido:"Vencida"};
+function abrirUsuario(u){
+  sel=u; render();
+  const L=A.filter(x=>x.usuario===u).sort((a,b)=>ORD[a.risco]-ORD[b.risco]||b.pontos-a.pontos);
+  const p=L[0];
+  document.getElementById("sAv").textContent=(p.nome||u).split(" ").map(s=>s[0]).slice(0,2).join("").toUpperCase();
+  document.getElementById("sNome").textContent=p.nome||u;
+  document.getElementById("sSub").textContent=`${u} · ${L.length} perfil(is)${p.status_usuario?" · "+p.status_usuario:""}`;
+  document.getElementById("sBody").innerHTML=`<h3>Perfis atribuídos</h3>`+L.map(x=>`<div class="it">
+    <div style="display:flex;gap:.5rem;align-items:center"><span class="p">${esc(x.perfil)}</span>${st(x.risco,RISCO[x.risco])}${st(x.situacao_gpa,GPA[x.situacao_gpa])}</div>
+    <div class="muted" style="font-size:.8125rem">${esc(x.descricao||"sem descrição no GPA")} · ${esc(x.validade)} (${esc(x.inicio)} → ${esc(x.fim)})${x.solicitacao?" · Solicitação: "+esc(x.solicitacao):""}</div>
+    <div>${x.motivos.map(m=>`<span class="pill">${esc(MOT[m]||m)}</span>`).join("")}</div>
+    ${x.acoes.length?`<ul>${x.acoes.map(a=>`<li>${esc(a)}</li>`).join("")}</ul>`:""}</div>`).join("");
+  const s=document.getElementById("side"); s.classList.add("on"); s.setAttribute("aria-hidden","false");
+}
+function fechar(){sel=null;const s=document.getElementById("side");s.classList.remove("on");s.setAttribute("aria-hidden","true");render();}
+document.getElementById("sX").onclick=fechar;
+document.addEventListener("keydown",e=>{if(e.key==="Escape")fechar();});
+
+/* Exportar CSV da visão atual */
+document.getElementById("csv").onclick=()=>{
+  const rows=window._rows; if(!rows.length) return;
+  const ks=Object.keys(rows[0]).filter(k=>k!=="acoes");
+  const v=x=>Array.isArray(x)?x.join(", "):x===true?"Sim":x===false?"":x;
+  const csv="﻿"+[ks.join(";"),...rows.map(r=>ks.map(k=>`"${String(v(r[k])??"").replace(/"/g,'""')}"`).join(";"))].join("\r\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+  a.download=`perfis_${view}_${filtro}_${D.data}.csv`; a.click();
+};
+
+/* Checklist e tendência */
+const K="chk-perfis-"+D.data; let S={}; try{S=JSON.parse(localStorage.getItem(K)||"{}")}catch(e){}
+document.getElementById("chk").innerHTML=D.checklist.map((t,i)=>`<label class="ck"><input type="checkbox" data-k="${i}" ${S[i]?"checked":""}> ${esc(t)}</label>`).join("");
+document.getElementById("chk").onchange=e=>{S[e.target.dataset.k]=e.target.checked;try{localStorage.setItem(K,JSON.stringify(S))}catch(_){}};
+const mx=Math.max(1,...D.tendencia.map(t=>t.total));
+document.getElementById("trend").innerHTML=D.tendencia.map(t=>`<div class="b" title="${t.data}: ${t.total} achados, ${t.alto} alto">
+  <b>${t.total}</b><div class="col" style="height:${t.total/mx*100}%"><div class="tot" style="flex:${t.total-t.alto}"></div><div class="alt" style="flex:${t.alto}"></div></div>
+  <small>${t.data.slice(8,10)}/${t.data.slice(5,7)}</small></div>`).join("")||'<span class="muted">Sem histórico ainda.</span>';
+
+render();
+</script>
+</body>
+</html>

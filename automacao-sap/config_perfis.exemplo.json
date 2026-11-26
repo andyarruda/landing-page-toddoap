@@ -1,0 +1,19 @@
+{
+  "_leia": "Copie para config_perfis.json e ajuste. Só precisa listar o que mudar; o resto usa o padrão.",
+  "sistema_sap": "PRD",
+  "dias_alerta_vencimento": 30,
+  "dias_inatividade": 90,
+  "perfis_criticos": ["SAP_ALL", "SAP_NEW", "*ADMIN*", "*BASIS*", "*_FULL*"],
+  "ignorar_usuarios": ["DDIC", "SAP*", "TMSADM", "WF-BATCH"],
+  "colunas_catalogo": {
+    "perfil": ["Perfil SAP", "Nome técnico"],
+    "solicitavel": ["Solicitável"],
+    "status": ["Status"],
+    "descricao": ["Descrição"],
+    "aprovador": ["Aprovador"]
+  },
+  "colunas_solicitacoes": {
+    "numero": ["Nº da solicitação"],
+    "status": ["Status"]
+  }
+}
